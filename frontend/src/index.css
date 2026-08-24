@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #fff; color: #0f172a; font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }

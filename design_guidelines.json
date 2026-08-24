@@ -1,0 +1,32 @@
+{
+  "app_type": "portfolio",
+  "theme": "Clean white corporate resume style with refined slate and navy accents",
+  "typography": {
+    "heading_font": "Plus Jakarta Sans, sans-serif",
+    "body_font": "Inter, sans-serif"
+  },
+  "colors": {
+    "primary": "#0F172A",
+    "secondary": "#475569",
+    "accent": "#2563EB",
+    "background": "#FFFFFF",
+    "card_background": "#F8FAFC",
+    "border": "#E2E8F0"
+  },
+  "image_urls": {
+    "profile_photo": "https://images.unsplash.com/photo-1609436132311-e4b0c9370469?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBjb3Jwb3JhdGUlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc4NzU0ODM0M3ww&ixlib=rb-4.1.0&q=85"
+  },
+  "key_functionalities": [
+    "Professional profile hero with photo and quick bio",
+    "Downloadable resume option",
+    "Interactive work experience timeline and education",
+    "Skills showcase with proficiency tags",
+    "Featured projects grid with links",
+    "Public social links (LinkedIn, GitHub)",
+    "Private contact action modal with secure inquiry submission (keeping direct phone/email hidden from public web scrapers while offering secure connection)"
+  ],
+  "accessibility": {
+    "contrast_ratio": "WCAG AA compliant",
+    "aria_labels": "Included on all interactive buttons and modals"
+  }
+}
