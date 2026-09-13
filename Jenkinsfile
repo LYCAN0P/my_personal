@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     stages {
@@ -9,12 +10,34 @@ pipeline {
             }
         }
 
+        stage('Check Tools') {
+            steps {
+                sh '''
+                    echo "Checking installed tools..."
+
+                    git --version
+                    python3 --version
+                    pip3 --version
+                    node --version
+                    npm --version
+                    docker --version
+                '''
+            }
+        }
+
         stage('Backend Tests') {
             steps {
                 sh '''
                     cd backend
-                    pip install -r requirements.txt
-                    pytest
+
+                    echo "Creating Python virtual environment..."
+                    python3 -m venv venv
+
+                    echo "Installing backend dependencies..."
+                    ./venv/bin/pip install -r requirements.txt
+
+                    echo "Running backend tests..."
+                    ./venv/bin/pytest
                 '''
             }
         }
@@ -23,7 +46,11 @@ pipeline {
             steps {
                 sh '''
                     cd frontend
+
+                    echo "Installing frontend dependencies..."
                     npm install --legacy-peer-deps
+
+                    echo "Building frontend..."
                     npm run build
                 '''
             }
@@ -32,10 +59,34 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                    docker build -t my-personal-backend ./backend
-                    docker build -t my-personal-frontend ./frontend
+                    echo "Building backend Docker image..."
+                    docker build -t my-personal-backend:latest ./backend
+
+                    echo "Building frontend Docker image..."
+                    docker build -t my-personal-frontend:latest ./frontend
                 '''
             }
+        }
+
+    }
+
+    post {
+
+        success {
+            echo '========================================'
+            echo '      CI PIPELINE SUCCESSFUL!           '
+            echo '========================================'
+        }
+
+        failure {
+            echo '========================================'
+            echo '         CI PIPELINE FAILED!             '
+            echo 'Check the stage above for the error.'
+            echo '========================================'
+        }
+
+        always {
+            echo 'Pipeline execution completed.'
         }
     }
 }
