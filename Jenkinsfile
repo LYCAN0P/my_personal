@@ -1,7 +1,12 @@
 pipeline {
 
     agent any
+    
+    environment {
+        REACT_APP_BACKEND_URL = 'http://localhost:8000'
+    }
 
+    
     stages {
 
         stage('Checkout') {
