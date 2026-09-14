@@ -1,12 +1,11 @@
 pipeline {
 
     agent any
-    
+
     environment {
-        REACT_APP_BACKEND_URL = 'http://localhost:8000'
+        REACT_APP_BACKEND_URL = 'http://my-personal-backend-test:8000'
     }
 
-    
     stages {
 
         stage('Checkout') {
@@ -30,19 +29,59 @@ pipeline {
             }
         }
 
+        stage('Build Backend Image') {
+            steps {
+                sh '''
+                    echo "Building backend Docker image..."
+
+                    docker build -t my-personal-backend:latest ./backend
+                '''
+            }
+        }
+
+        stage('Start Test Environment') {
+            steps {
+                sh '''
+                    echo "Starting MongoDB..."
+
+                    docker rm -f my-personal-mongodb-test 2>/dev/null || true
+
+                    docker run -d \
+                        --name my-personal-mongodb-test \
+                        --network jenkins \
+                        mongo:7
+
+                    echo "Starting backend..."
+
+                    docker rm -f my-personal-backend-test 2>/dev/null || true
+
+                    docker run -d \
+                        --name my-personal-backend-test \
+                        --network jenkins \
+                        -e MONGO_URL=mongodb://my-personal-mongodb-test:27017 \
+                        -e DB_NAME=my_personal \
+                        my-personal-backend:latest
+
+                    echo "Waiting for backend to start..."
+
+                    sleep 10
+
+                    docker ps
+                '''
+            }
+        }
+
         stage('Backend Tests') {
             steps {
                 sh '''
-                    cd backend
-
-                    echo "Creating Python virtual environment..."
-                    python3 -m venv venv
-
-                    echo "Installing backend dependencies..."
-                    ./venv/bin/pip install -r requirements.txt
-
                     echo "Running backend tests..."
-                    ./venv/bin/pytest
+
+                    python3 -m venv backend/venv
+
+                    backend/venv/bin/pip install -r backend/requirements.txt
+
+                    REACT_APP_BACKEND_URL=http://my-personal-backend-test:8000 \
+                    backend/venv/bin/pytest backend/tests
                 '''
             }
         }
@@ -53,9 +92,11 @@ pipeline {
                     cd frontend
 
                     echo "Installing frontend dependencies..."
+
                     npm install --legacy-peer-deps
 
                     echo "Building frontend..."
+
                     npm run build
                 '''
             }
@@ -64,18 +105,30 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                    echo "Building backend Docker image..."
+                    echo "Building final backend image..."
+
                     docker build -t my-personal-backend:latest ./backend
 
-                    echo "Building frontend Docker image..."
+                    echo "Building final frontend image..."
+
                     docker build -t my-personal-frontend:latest ./frontend
                 '''
             }
         }
-
     }
 
     post {
+
+        always {
+            echo 'Cleaning up test containers...'
+
+            sh '''
+                docker rm -f my-personal-backend-test 2>/dev/null || true
+                docker rm -f my-personal-mongodb-test 2>/dev/null || true
+            '''
+
+            echo 'Pipeline execution completed.'
+        }
 
         success {
             echo '========================================'
@@ -85,13 +138,8 @@ pipeline {
 
         failure {
             echo '========================================'
-            echo '         CI PIPELINE FAILED!             '
-            echo 'Check the stage above for the error.'
+            echo '         CI PIPELINE FAILED!            '
             echo '========================================'
-        }
-
-        always {
-            echo 'Pipeline execution completed.'
         }
     }
 }
